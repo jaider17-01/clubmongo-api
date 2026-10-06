@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Clubes de Fútbol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar-link.active { background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); color: white; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-900 text-white flex flex-col">
+            <div class="p-6 border-b border-gray-800">
+                <h1 class="text-2xl font-bold"><i class="fas fa-futbol text-blue-400 mr-2"></i>ClubManager Pro</h1>
+                <p class="text-gray-400 text-sm mt-1">Sistema de Gestión Deportivo</p>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button onclick="showSection('dashboard')" class="sidebar-link active w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-chart-line mr-3"></i>Dashboard
+                </button>
+                <button onclick="showSection('clubs')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-shield-alt mr-3"></i>Clubes
+                </button>
+                <button onclick="showSection('entrenadores')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-user-tie mr-3"></i>Entrenadores
+                </button>
+                <button onclick="showSection('jugadores')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-running mr-3"></i>Jugadores
+                </button>
+                <button onclick="showSection('asociaciones')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-building mr-3"></i>Asociaciones
+                </button>
+                <button onclick="showSection('competiciones')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-trophy mr-3"></i>Competiciones
+                </button>
+            </nav>
+            <div class="p-4 border-t border-gray-800">
+                <div class="text-xs text-gray-500">
+                    <p>Spring Boot 3.5.0</p>
+                    <p>MongoDB Atlas</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <h2 id="section-title" class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="refreshData()" class="text-gray-600 hover:text-blue-600 transition">
+                            <i class="fas fa-sync-alt text-xl"></i>
+                        </button>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-circle text-green-500 mr-2"></i>Conectado
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="p-8" id="content-area">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Clubs</p>
+                                    <p id="stat-clubs" class="text-3xl font-bold text-blue-600 mt-2">0</p>
+                                </div>
+                                <i class="fas fa-shield-alt text-4xl text-blue-200"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Entrenadores</p>
+                                    <p id="stat-entrenadores" class="text-3xl font-bold text-green-600 mt-2">0</p>
+                                </div>
+                                <i class="fas fa-user-tie text-4xl text-green-200"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Jugadores</p>
+                                    <p id="stat-jugadores" class="text-3xl font-bold text-purple-600 mt-2">0</p>
+                                </div>
+                                <i class="fas fa-running text-4xl text-purple-200"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Asociaciones</p>
+                                    <p id="stat-asociaciones" class="text-3xl font-bold text-orange-600 mt-2">0</p>
+                                </div>
+                                <i class="fas fa-building text-4xl text-orange-200"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Competiciones</p>
+                                    <p id="stat-competiciones" class="text-3xl font-bold text-red-600 mt-2">0</p>
+                                </div>
+                                <i class="fas fa-trophy text-4xl text-red-200"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-info-circle text-blue-500 mr-2"></i>Información del Sistema
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="font-semibold text-blue-900">Relaciones Implementadas</p>
+                                <ul class="mt-2 space-y-1 text-blue-800">
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>OneToOne: Club → Entrenador</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>OneToMany: Club → Jugadores</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>ManyToOne: Club → Asociación</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>ManyToMany: Club → Competiciones</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="font-semibold text-green-900">Tecnologías</p>
+                                <ul class="mt-2 space-y-1 text-green-800">
+                                    <li><i class="fas fa-server mr-2"></i>Spring Boot 3.5.0</li>
+                                    <li><i class="fas fa-database mr-2"></i>MongoDB Atlas</li>
+                                    <li><i class="fas fa-code mr-2"></i>Spring Data MongoDB</li>
+                                    <li><i class="fas fa-laptop-code mr-2"></i>Lazy Loading con @DocumentReference</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clubs Section -->
+                <div id="clubs-section" class="hidden fade-in">
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Crear Nuevo Club</h3>
+                        <form id="club-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <input type="text" id="club-nombre" placeholder="Nombre del Club" required class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="club-pais" placeholder="País" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="number" id="club-ano" placeholder="Año Fundación" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="submit" class="md:col-span-3 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+                                <i class="fas fa-plus mr-2"></i>Guardar Club
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Clubes Registrados</h3>
+                        <div id="clubs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+                </div>
+
+                <!-- Entrenadores Section -->
+                <div id="entrenadores-section" class="hidden fade-in">
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Crear Nuevo Entrenador</h3>
+                        <form id="entrenador-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="ent-nombre" placeholder="Nombre" required class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="text" id="ent-apellido" placeholder="Apellido" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="number" id="ent-edad" placeholder="Edad" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="text" id="ent-nacionalidad" placeholder="Nacionalidad" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <button type="submit" class="md:col-span-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">
+                                <i class="fas fa-plus mr-2"></i>Guardar Entrenador
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Entrenadores</h3>
+                        <div id="entrenadores-list" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!-- Jugadores Section -->
+                <div id="jugadores-section" class="hidden fade-in">
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Crear Nuevo Jugador</h3>
+                        <form id="jugador-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="jug-nombre" placeholder="Nombre" required class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="text" id="jug-apellido" placeholder="Apellido" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="number" id="jug-numero" placeholder="Número" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="text" id="jug-posicion" placeholder="Posición" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <button type="submit" class="md:col-span-4 bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-purple-700 transition">
+                                <i class="fas fa-plus mr-2"></i>Guardar Jugador
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Jugadores</h3>
+                        <div id="jugadores-list" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!-- Asociaciones Section -->
+                <div id="asociaciones-section" class="hidden fade-in">
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Crear Nueva Asociación</h3>
+                        <form id="asociacion-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <input type="text" id="asoc-nombre" placeholder="Nombre" required class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="text" id="asoc-pais" placeholder="País" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="text" id="asoc-presidente" placeholder="Presidente" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <button type="submit" class="md:col-span-3 bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-700 transition">
+                                <i class="fas fa-plus mr-2"></i>Guardar Asociación
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Asociaciones</h3>
+                        <div id="asociaciones-list" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!-- Competiciones Section -->
+                <div id="competiciones-section" class="hidden fade-in">
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Crear Nueva Competición</h3>
+                        <form id="competicion-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="comp-nombre" placeholder="Nombre" required class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="number" id="comp-monto" placeholder="Monto Premio" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="date" id="comp-inicio" placeholder="Fecha Inicio" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <input type="date" id="comp-fin" placeholder="Fecha Fin" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <button type="submit" class="md:col-span-4 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition">
+                                <i class="fas fa-plus mr-2"></i>Guardar Competición
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Competiciones</h3>
+                        <div id="competiciones-list" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let currentSection = 'dashboard';
+
+        function showSection(section) {
+            document.querySelectorAll('[id$="-section"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(section + '-section').classList.remove('hidden');
+            
+            document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+            event.target.closest('.sidebar-link').classList.add('active');
+            
+            document.getElementById('section-title').textContent = section.charAt(0).toUpperCase() + section.slice(1);
+            currentSection = section;
+            
+            if (section === 'dashboard') loadDashboard();
+            else if (section === 'clubs') loadClubs();
+            else if (section === 'entrenadores') loadEntrenadores();
+            else if (section === 'jugadores') loadJugadores();
+            else if (section === 'asociaciones') loadAsociaciones();
+            else if (section === 'competiciones') loadCompeticiones();
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE}/clubes/stats`);
+                const stats = await response.json();
+                document.getElementById('stat-clubs').textContent = stats.totalClubs || 0;
+                document.getElementById('stat-entrenadores').textContent = stats.totalEntrenadores || 0;
+                document.getElementById('stat-jugadores').textContent = stats.totalJugadores || 0;
+                document.getElementById('stat-asociaciones').textContent = stats.totalAsociaciones || 0;
+                document.getElementById('stat-competiciones').textContent = stats.totalCompeticiones || 0;
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        async function loadClubs() {
+            try {
+                const response = await fetch(`${API_BASE}/clubes`);
+                const clubs = await response.json();
+                const list = document.getElementById('clubs-list');
+                list.innerHTML = clubs.length === 0 ? '<p class="text-gray-500 text-center py-4 col-span-3">No hay clubs registrados</p>' : '';
+                clubs.forEach(club => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white border border-gray-200 rounded-xl p-5 card-hover';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <h4 class="font-bold text-lg text-gray-800">${club.nombre || 'Sin nombre'}</h4>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${club.pais || 'N/A'}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3 italic">"${club.descripcion || 'Sin descripción'}"</p>
+                        <div class="space-y-2 text-sm">
+                            <p><i class="fas fa-map-marker-alt text-red-500 w-5"></i> ${club.estadio || 'N/A'}</p>
+                            <p><i class="fas fa-palette text-purple-500 w-5"></i> ${club.colores || 'N/A'}</p>
+                            <p><i class="fas fa-user-tie text-green-500 w-5"></i> DT: ${club.entrenador ? club.entrenador.nombre + ' ' + club.entrenador.apellido : 'N/A'}</p>
+                            <p><i class="fas fa-users text-blue-500 w-5"></i> Plantilla: ${club.jugadores ? club.jugadores.length : 0} jugadores</p>
+                            ${club.asociacion ? `<p><i class="fas fa-building text-orange-500 w-5"></i> ${club.asociacion.nombre}</p>` : ''}
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading clubs:', error);
+            }
+        }
+
+        async function loadEntrenadores() {
+            try {
+                const response = await fetch(`${API_BASE}/entrenadores`);
+                const entrenadores = await response.json();
+                const list = document.getElementById('entrenadores-list');
+                list.innerHTML = entrenadores.length === 0 ? '<p class="text-gray-500 text-center py-4">No hay entrenadores registrados</p>' : '';
+                entrenadores.forEach(ent => {
+                    const div = document.createElement('div');
+                    div.className = 'border border-gray-200 rounded-lg p-4 hover:shadow-md transition';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${ent.nombre} ${ent.apellido}</h4>
+                                <p class="text-sm text-gray-600">${ent.edad} años • ${ent.nacionalidad}</p>
+                            </div>
+                            <button onclick="deleteEntrenador('${ent.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading entrenadores:', error);
+            }
+        }
+
+        async function loadJugadores() {
+            try {
+                const response = await fetch(`${API_BASE}/jugadores`);
+                const jugadores = await response.json();
+                const list = document.getElementById('jugadores-list');
+                list.innerHTML = jugadores.length === 0 ? '<p class="text-gray-500 text-center py-4">No hay jugadores registrados</p>' : '';
+                jugadores.forEach(jug => {
+                    const div = document.createElement('div');
+                    div.className = 'border border-gray-200 rounded-lg p-4 hover:shadow-md transition';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${jug.nombre} ${jug.apellido}</h4>
+                                <p class="text-sm text-gray-600">#${jug.numero} • ${jug.posicion}</p>
+                            </div>
+                            <button onclick="deleteJugador('${jug.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading jugadores:', error);
+            }
+        }
+
+        async function loadAsociaciones() {
+            try {
+                const response = await fetch(`${API_BASE}/asociaciones`);
+                const asociaciones = await response.json();
+                const list = document.getElementById('asociaciones-list');
+                list.innerHTML = asociaciones.length === 0 ? '<p class="text-gray-500 text-center py-4">No hay asociaciones registradas</p>' : '';
+                asociaciones.forEach(asoc => {
+                    const div = document.createElement('div');
+                    div.className = 'border border-gray-200 rounded-lg p-4 hover:shadow-md transition';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${asoc.nombre}</h4>
+                                <p class="text-sm text-gray-600">${asoc.pais} • Presidente: ${asoc.presidente}</p>
+                            </div>
+                            <button onclick="deleteAsociacion('${asoc.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading asociaciones:', error);
+            }
+        }
+
+        async function loadCompeticiones() {
+            try {
+                const response = await fetch(`${API_BASE}/competiciones`);
+                const competiciones = await response.json();
+                const list = document.getElementById('competiciones-list');
+                list.innerHTML = competiciones.length === 0 ? '<p class="text-gray-500 text-center py-4">No hay competiciones registradas</p>' : '';
+                competiciones.forEach(comp => {
+                    const div = document.createElement('div');
+                    div.className = 'border border-gray-200 rounded-lg p-4 hover:shadow-md transition';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${comp.nombre}</h4>
+                                <p class="text-sm text-gray-600">Premio: $${comp.montoPremio?.toLocaleString()} • ${comp.fechaInicio} a ${comp.fechaFin}</p>
+                            </div>
+                            <button onclick="deleteCompeticion('${comp.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading competiciones:', error);
+            }
+        }
+
+        // Form submissions
+        document.getElementById('club-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nombre: document.getElementById('club-nombre').value,
+                pais: document.getElementById('club-pais').value,
+                anoFundacion: document.getElementById('club-ano').value ? parseInt(document.getElementById('club-ano').value) : null
+            };
+            await fetch(`${API_BASE}/clubes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            document.getElementById('club-form').reset();
+            loadClubs();
+        });
+
+        document.getElementById('entrenador-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nombre: document.getElementById('ent-nombre').value,
+                apellido: document.getElementById('ent-apellido').value,
+                edad: document.getElementById('ent-edad').value ? parseInt(document.getElementById('ent-edad').value) : null,
+                nacionalidad: document.getElementById('ent-nacionalidad').value
+            };
+            await fetch(`${API_BASE}/entrenadores`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            document.getElementById('entrenador-form').reset();
+            loadEntrenadores();
+        });
+
+        document.getElementById('jugador-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nombre: document.getElementById('jug-nombre').value,
+                apellido: document.getElementById('jug-apellido').value,
+                numero: document.getElementById('jug-numero').value ? parseInt(document.getElementById('jug-numero').value) : null,
+                posicion: document.getElementById('jug-posicion').value
+            };
+            await fetch(`${API_BASE}/jugadores`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            document.getElementById('jugador-form').reset();
+            loadJugadores();
+        });
+
+        document.getElementById('asociacion-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nombre: document.getElementById('asoc-nombre').value,
+                pais: document.getElementById('asoc-pais').value,
+                presidente: document.getElementById('asoc-presidente').value
+            };
+            await fetch(`${API_BASE}/asociaciones`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            document.getElementById('asociacion-form').reset();
+            loadAsociaciones();
+        });
+
+        document.getElementById('competicion-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nombre: document.getElementById('comp-nombre').value,
+                montoPremio: document.getElementById('comp-monto').value ? parseFloat(document.getElementById('comp-monto').value) : null,
+                fechaInicio: document.getElementById('comp-inicio').value,
+                fechaFin: document.getElementById('comp-fin').value
+            };
+            await fetch(`${API_BASE}/competiciones`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            document.getElementById('competicion-form').reset();
+            loadCompeticiones();
+        });
+
+        // Delete functions
+        async function deleteClub(id) {
+            if (confirm('¿Eliminar este club?')) {
+                await fetch(`${API_BASE}/clubes/${id}`, { method: 'DELETE' });
+                loadClubs();
+            }
+        }
+        async function deleteEntrenador(id) {
+            if (confirm('¿Eliminar este entrenador?')) {
+                await fetch(`${API_BASE}/entrenadores/${id}`, { method: 'DELETE' });
+                loadEntrenadores();
+            }
+        }
+        async function deleteJugador(id) {
+            if (confirm('¿Eliminar este jugador?')) {
+                await fetch(`${API_BASE}/jugadores/${id}`, { method: 'DELETE' });
+                loadJugadores();
+            }
+        }
+        async function deleteAsociacion(id) {
+            if (confirm('¿Eliminar esta asociación?')) {
+                await fetch(`${API_BASE}/asociaciones/${id}`, { method: 'DELETE' });
+                loadAsociaciones();
+            }
+        }
+        async function deleteCompeticion(id) {
+            if (confirm('¿Eliminar esta competición?')) {
+                await fetch(`${API_BASE}/competiciones/${id}`, { method: 'DELETE' });
+                loadCompeticiones();
+            }
+        }
+
+        function refreshData() {
+            if (currentSection === 'dashboard') loadDashboard();
+            else if (currentSection === 'clubs') loadClubs();
+            else if (currentSection === 'entrenadores') loadEntrenadores();
+            else if (currentSection === 'jugadores') loadJugadores();
+            else if (currentSection === 'asociaciones') loadAsociaciones();
+            else if (currentSection === 'competiciones') loadCompeticiones();
+        }
+
+        window.onload = loadDashboard;
+    </script>
+</body>
+</html>
