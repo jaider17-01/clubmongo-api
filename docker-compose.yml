@@ -1,0 +1,26 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: clubmongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    build: .
+    container_name: clubmongo-api
+    ports:
+      - "8103:8103"
+    environment:
+      PORT: 8103
+      MONGODB_URI: mongodb://mongo:27017/clubdb
+    depends_on:
+      mongo:
+        condition: service_healthy
+volumes:
+  mongo-data:

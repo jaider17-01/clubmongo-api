@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: clubmongo-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8103"
+      - key: MONGODB_URI
+        sync: false
