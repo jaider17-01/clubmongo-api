@@ -2,6 +2,14 @@
 
 Versión en MongoDB del ejercicio de relaciones JPA (Club, Entrenador, Jugador, Asociación, Competición).
 
+## Tecnologías
+
+Java 17 · Spring Boot 3.5 · Spring Data MongoDB · Bean Validation · Spring Boot Actuator · springdoc-openapi (documentación de la API) · Docker y Docker Compose · despliegue configurado para Render (`render.yaml`) · cliente web estático en `src/main/resources/static/index.html`.
+
+## Estado
+
+Proyecto académico que expone endpoints CRUD para clubes, jugadores, asociaciones y competiciones. Aún no incluye pruebas automatizadas (no existe `src/test`); agregarlas es una mejora pendiente.
+
 ## Ejecutar localmente con Docker
 
 Requiere Docker Desktop. Desde la raíz del proyecto:
